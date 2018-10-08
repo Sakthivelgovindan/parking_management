@@ -4,7 +4,7 @@
      $hostname="localhost";
      $username="root";
      $password="root";
-     $database="go";
+     $database="node";
      $mysqli = new mysqli($hostname, $username, $password, $database);
      
      if(mysqli_connect_errno()) {

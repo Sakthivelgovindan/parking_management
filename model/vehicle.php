@@ -51,6 +51,84 @@ error_reporting(E_ALL);
    }
    elseif($action == "exit_vehicle"){
 
+    $vehicle_no = $result->vehicle_no;
+    $timestamp  = strtotime(date("Y-m-d H:i:s"));
+    $status = 'inactive';
+    $status_active = 'active';
+
+
+
+    $sql="SELECT count(*) from `vehicle_details` where `vehicle_no`= ? AND `status` = ? ";
+    if($stmt = $connect_ref -> prepare($sql)){
+        $stmt -> bind_param('ss',$vehicle_no,$status_active);
+        $stmt -> execute();
+        $stmt -> bind_result($count);
+        $stmt -> fetch();		
+        $stmt -> close();
+    }
+
+    if($count == 0){
+
+        $response['type'] = "null";
+        
+    }
+
+    else{
+
+        $sql="UPDATE `vehicle_details` SET `vehicle_outtime` = ?, `status`=? WHERE `vehicle_no`=?";
+        if($stmt = $connect_ref -> prepare($sql)){
+            $stmt -> bind_param('sss',$timestamp,$status,$vehicle_no);
+            $stmt -> execute();
+            $stmt -> fetch();		
+            $stmt -> close();
+        }
+
+
+    $sql="SELECT `vehicle_intime`,`vehicle_outtime` from `vehicle_details` where `vehicle_no`= ? ";
+        if($stmt = $connect_ref -> prepare($sql)){
+            $stmt -> bind_param('s',$vehicle_no);
+            $stmt -> execute();
+            $stmt -> bind_result($vehicle_intime,$vehicle_outtime);
+            $stmt -> fetch();		
+            $stmt -> close();
+        }
+
+        $hours_used = (int)$vehicle_outtime - (int)$vehicle_intime;
+        
+        $hours = (int)($hours_used / 3600);
+        $minutes = (int)($hours_used % 60);
+        
+        $total_minutes = (int)($hours_used/60);
+
+        $hours_amount = 10;
+        
+        $minute_amount =  (float)($hours_amount / 60);
+
+        $total_amount = $minute_amount*$total_minutes;
+
+
+        if($hours > 24){
+            $days = (int)($hours/24);
+            $hours = (int) ($hours%24);
+            $response['days'] = $days;
+            $response['hours'] = $hours;
+            $response['minutes'] = $minutes;
+        }
+        else{
+            $response['days'] = 0;
+            $response['hours'] = $hours;
+            $response['minutes'] = $minutes;
+        }
+
+       $response['total_amount'] = $total_amount;
+       $response['type'] = "not_null";
+
+    }
+
+        
+        echo json_encode($response);
+
+        
    }
     
 ?>

@@ -37,7 +37,7 @@ function parking_vehicle(){
             var home = "";
 
             home ='<legend>Exit Vehicle</legend><div class="form-group"><label for="inputdefault">Vehicle No:</label>'+
-                  '<input class="form-control" id="vehicle_no" type="text"><br><button type="submit" class="btn btn-default" id="vehicle-exit">Submit</button></div>';
+                  '<input class="form-control" id="vehicle_no" type="text"><br><button type="submit" class="btn btn-default" id="vehicle-exit">Exit</button><br><br><span id="total_time"></span></div>';
 
                   $('#dynamic_content').html(home);
         }
@@ -163,7 +163,39 @@ $(document).ready(function(){
 
    });
 
-   $(document).on('click','#vehicle_exit',function(){
+   $(document).on('click','#vehicle-exit',function(){
+
+
+    var vehicle_no = $('#vehicle_no').val();
+    var data_val = {};
+    data_val['action']     = "exit_vehicle";
+    data_val['vehicle_no'] = vehicle_no;
+    json_value = JSON.stringify(data_val);
+    $.ajax({
+        url: "model/vehicle.php",
+        type: "POST",
+        data: {
+            myData :json_value
+        },
+        async: false
+    }).done(function(result) {
+
+        var data =JSON.parse(result);
+        
+        if(data.type != "null"){
+            var content = '<span>Total Time used : '+data.days+'days '+data.hours+'hours '+data.minutes+'min';
+
+        content += '<br><span>Total amount : Rs.'+data.total_amount+'</span>';
+
+        $('#total_time').html(content);
+        }
+        else{
+            $('#total_time').html('Vehicle Not found...').css('color','red');
+        }
+        
+        
+
+    });
 
     });
 
